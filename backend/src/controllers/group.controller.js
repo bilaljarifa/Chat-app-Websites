@@ -19,10 +19,14 @@ export const createGroup = async (req, res) => {
 
 export const getMyGroups = async (req, res) => {
   try {
-    const groups = await Group.find({ members: req.user.id }).populate('members', 'fullName profilePic');
+    const groups = await Group.find({ members: req.user._id }).populate(
+      "members",
+      "fullName profilePic email"
+    );
     res.status(200).json(groups);
   } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch groups', error: error.message });
+    console.error("Failed to fetch groups:", error);
+    res.status(500).json({ message: "Failed to fetch groups", error: error.message });
   }
 };
 

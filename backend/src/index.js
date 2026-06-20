@@ -8,6 +8,7 @@ import path from "path";
 import { connectDB } from "./lib/db.js";
 import { cleanupOrphanedFriendRequests } from "./controllers/user.controller.js";
 import { seedChatBot } from "./lib/seedChatBot.js";
+import { seedAdmin } from "./lib/seedAdmin.js";
 
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
@@ -18,7 +19,7 @@ import reportRoutes from "./routes/report.route.js";
 import reactionRoutes from "./routes/reaction.route.js";
 import toxicityRoutes from "./routes/toxicity.route.js";
 import encryptionRoutes from "./routes/encryption.route.js";
-import { app, server } from "./lib/socket.js";
+import { app, server, initChatBot } from "./lib/socket.js";
 
 dotenv.config();
 
@@ -53,15 +54,20 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-server.listen(PORT, async () => {
-  console.log("server is running on PORT:" + PORT);
+const startServer = async () => {
   await connectDB();
-
-  // Seed ChatBot
   await seedChatBot();
-
-  // Clean up orphaned friend requests on server start
+  await seedAdmin();
+  await initChatBot();
   await cleanupOrphanedFriendRequests();
+
+  server.listen(PORT, () => {
+    console.log("server is running on PORT:" + PORT);
+  });
+};
+
+startServer().catch((error) => {
+  console.error("Failed to start server:", error.message);
 });
 
 // Trigger restart

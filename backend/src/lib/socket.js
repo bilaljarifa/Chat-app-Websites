@@ -7,7 +7,7 @@ const app = express();
 const server = http.createServer(app);
 
 let chatBotId = null;
-const initChatBot = async () => {
+export const initChatBot = async () => {
   try {
     const bot = await User.findOne({ isSystemBot: true });
     if (bot) {
@@ -18,7 +18,6 @@ const initChatBot = async () => {
     console.error("Failed to fetch ChatBot ID for socket:", err);
   }
 };
-initChatBot();
 
 const io = new Server(server, {
   cors: {

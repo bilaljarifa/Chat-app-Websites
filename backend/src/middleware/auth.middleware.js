@@ -1,8 +1,11 @@
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
+import { waitForDb } from "../lib/db.js";
 
 export const protectRoute = async (req, res, next) => {
   try {
+    await waitForDb();
+
     const token = req.cookies.jwt;
 
     if (!token) {
@@ -25,6 +28,10 @@ export const protectRoute = async (req, res, next) => {
 
     next();
   } catch (error) {
+    if (error.message === "Database unavailable") {
+      return res.status(503).json({ message: "Database unavailable, please try again shortly" });
+    }
+
     console.log("Error in protectRoute middleware: ", error.message);
     res.status(500).json({ message: "Internal server error" });
   }

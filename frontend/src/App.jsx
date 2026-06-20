@@ -27,6 +27,7 @@ const App = () => {
   const { theme } = useThemeStore();
   const navigate = useNavigate();
   const location = useLocation();
+  const isLoginPage = location.pathname === "/login";
 
   useEffect(() => {
     checkAuth();
@@ -73,7 +74,7 @@ const App = () => {
     <div data-theme={theme} className="min-h-screen bg-base-100 text-base-content transition-colors duration-200">
       <SentimentModelProvider>
         <InterestGuard>
-          <Navbar />
+          {!isLoginPage && <Navbar />}
 
           <Routes>
             {/* Public routes */}

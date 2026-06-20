@@ -20,10 +20,10 @@ const AddFriendPage = () => {
   const [loopNum, setLoopNum] = useState(0);
   const [typingSpeed, setTypingSpeed] = useState(150);
 
-  // Updated words array to include user's name and Beyonder
+  // Updated words array to include user's name and chatwithme
   const words = authUser?.fullName
-    ? [`Welcome ${authUser.fullName}`, "Welcome to Beyonder"]
-    : ["Welcome", "Welcome to Beyonder"];
+    ? [`Welcome ${authUser.fullName}`, "Welcome to chatwithme"]
+    : ["Welcome", "Welcome to chatwithme"];
 
   useEffect(() => {
     const handleTyping = () => {

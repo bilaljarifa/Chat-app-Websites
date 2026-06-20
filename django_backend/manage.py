@@ -3,6 +3,17 @@
 import os
 import sys
 
+# Configure stdout and stderr to use UTF-8 on Windows to prevent UnicodeEncodeError with emojis
+if sys.platform == 'win32':
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
+    except AttributeError:
+        # Fallback for Python versions where reconfigure is not available
+        import codecs
+        sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer)
+        sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer)
+
 
 def main():
     """Run administrative tasks."""

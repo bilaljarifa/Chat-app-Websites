@@ -2,28 +2,31 @@ import React, { useEffect, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
 import SidebarSkeleton from "./skeletons/SidebarSkeleton";
-import { Users, UserPlus } from "lucide-react";
+import {
+  MessageSquare,
+  Search,
+  User,
+  Users,
+  UsersRound,
+  Wifi,
+} from "lucide-react";
 import { axiosInstance } from "../lib/axios";
 
 const Sidebar = () => {
   const { selectedUser, setSelectedUser, isUsersLoading } = useChatStore();
-
   const { onlineUsers, authUser, friends, setFriends, socket } = useAuthStore();
   const isAdmin = authUser?.email === "bey@email.com";
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
   const [groups, setGroups] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("friends"); // New state for tab switching
+  const [activeTab, setActiveTab] = useState("friends");
 
   useEffect(() => {
     const fetchFriends = async () => {
       try {
-        let res;
-        if (isAdmin) {
-          res = await axiosInstance.get("/user/all-users-except-admin");
-        } else {
-          res = await axiosInstance.get("/user/friends");
-        }
+        const res = isAdmin
+          ? await axiosInstance.get("/user/all-users-except-admin")
+          : await axiosInstance.get("/user/friends");
         setFriends(res.data);
       } catch (error) {
         console.error("Failed to fetch friends", error);
@@ -33,8 +36,8 @@ const Sidebar = () => {
     const fetchGroups = async () => {
       try {
         const res = await axiosInstance.get("/group");
-        const userGroups = res.data.filter(group =>
-          group.members.some(member => member._id === authUser._id)
+        const userGroups = res.data.filter((group) =>
+          group.members.some((member) => member._id === authUser._id)
         );
         setGroups(userGroups);
       } catch (error) {
@@ -44,215 +47,258 @@ const Sidebar = () => {
 
     fetchFriends();
     fetchGroups();
-  }, [authUser?.friends, selectedUser]);
+  }, [authUser?.friends, selectedUser, authUser?._id, isAdmin, setFriends]);
 
-  // Socket listener for group profile updates
   useEffect(() => {
     if (!socket) return;
 
     const handleGroupProfileUpdate = (data) => {
-      console.log("Group profile updated:", data);
-      // Update the groups state with the new profile picture
-      setGroups(prevGroups => 
-        prevGroups.map(group => 
-          group._id === data.groupId 
-            ? { ...group, profilePic: data.profilePic }
-            : group
+      setGroups((prevGroups) =>
+        prevGroups.map((group) =>
+          group._id === data.groupId ? { ...group, profilePic: data.profilePic } : group
         )
       );
-      
-      // If this is the currently selected group, update it too
+
       if (selectedUser && selectedUser.groupId === data.groupId) {
         setSelectedUser({ ...selectedUser, profilePic: data.profilePic });
       }
     };
 
     socket.on("groupProfileUpdated", handleGroupProfileUpdate);
-
-    return () => {
-      socket.off("groupProfileUpdated", handleGroupProfileUpdate);
-    };
+    return () => socket.off("groupProfileUpdated", handleGroupProfileUpdate);
   }, [socket, selectedUser, setSelectedUser]);
 
   const filteredUsers = (showOnlineOnly
     ? friends.filter((user) => onlineUsers.includes(user._id))
     : friends
   )
-    .filter((user) =>
-      user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    .filter(
+      (user) =>
+        user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => a.fullName.localeCompare(b.fullName));
 
+  const filteredGroups = groups.filter((group) =>
+    group.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const onlineCount = friends.filter((user) => onlineUsers.includes(user._id)).length;
+
   const openGroupChat = (group) => {
-    console.log("Selected group from sidebar:", group);
     setSelectedUser({
       _id: group._id,
       fullName: group.name,
       groupId: group._id,
       isGroup: true,
-      profilePic: "/group-avatar.png", // optional
+      profilePic: group.profilePic || group.avatar || "/group-avatar.png",
       members: group.members,
     });
   };
 
+  const isSelected = (id) => selectedUser?._id === id || selectedUser?.groupId === id;
+
   if (isUsersLoading) return <SidebarSkeleton />;
 
   return (
-    <aside className="h-full w-28 lg:w-96 bg-base-100/40 backdrop-blur-xl border-r border-white/5 flex flex-col transition-all duration-300 shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10">
-      <div className="border-b border-white/5 w-full p-6 bg-gradient-to-b from-base-100/80 to-transparent">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="p-2 bg-primary/10 rounded-xl">
-            <Users className="size-6 text-primary" />
+    <aside className="h-full w-20 sm:w-24 lg:w-80 xl:w-96 bg-base-100/60 backdrop-blur-2xl border-r border-white/10 flex flex-col shadow-[4px_0_32px_rgba(0,0,0,0.04)] z-10">
+      {/* Header */}
+      <div className="hidden lg:flex shrink-0 p-5 border-b border-white/10 bg-gradient-to-b from-base-100/90 to-transparent flex-col space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-md shadow-primary/25 transition-transform duration-300 hover:scale-105">
+              <MessageSquare className="w-5 h-5 text-primary-content" />
+            </div>
+            {onlineCount > 0 && activeTab === "friends" && (
+              <span className="absolute -top-0.5 -right-0.5 flex h-3.5 w-3.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-base-100"></span>
+              </span>
+            )}
           </div>
-          <span className="font-extrabold text-xl tracking-tight hidden lg:block bg-clip-text text-transparent bg-gradient-to-r from-base-content to-base-content/60">
-            Chats
-          </span>
+          <div>
+            <h2 className="font-bold text-lg leading-tight tracking-tight text-base-content">
+              Messages
+            </h2>
+            <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+              {activeTab === "friends" ? (
+                <>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shadow-sm">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    {onlineCount} Online
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-base-content/5 text-base-content/70 border border-base-content/10 shadow-sm">
+                    {friends.length} Contacts
+                  </span>
+                </>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary border border-primary/20 shadow-sm">
+                  <Users className="w-3 h-3" />
+                  {groups.length} Groups
+                </span>
+              )}
+            </div>
+          </div>
         </div>
 
-        <div className="mt-2">
+        {/* Search */}
+        <div className="relative group">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/40 group-focus-within:text-primary transition-colors" />
           <input
             type="text"
-            placeholder={`Search ${activeTab === "friends" ? "Contacts" : "Groups"}...`}
+            placeholder={activeTab === "friends" ? "Search contacts..." : "Search groups..."}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="input w-full rounded-full bg-base-200/50 border border-white/5 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-transparent transition-all duration-300 placeholder:text-base-content/40 px-5 shadow-inner"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-base-200/60 border border-white/10 text-sm focus:outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15 transition-all placeholder:text-base-content/35 shadow-inner"
           />
         </div>
 
-        {/* Combined row with tab buttons and online filter toggle */}
-        <div className="mt-4 flex items-center justify-between gap-2">
-          {/* Tab Buttons */}
-          <div className="flex gap-1 p-1 bg-base-200/50 rounded-full border border-white/5 w-fit">
+        {/* Tabs */}
+        <div className="flex items-center gap-2">
+          <div className="flex flex-1 p-1 rounded-xl bg-base-200/60 border border-white/10">
             <button
               onClick={() => setActiveTab("friends")}
-              className={`py-2 px-4 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs lg:text-sm font-semibold transition-all ${
                 activeTab === "friends"
-                  ? "bg-primary text-primary-content shadow-md scale-100"
-                  : "text-base-content/60 hover:text-base-content hover:bg-base-100/50 scale-95 hover:scale-100"
+                  ? "bg-base-100 text-primary shadow-sm"
+                  : "text-base-content/55 hover:text-base-content"
               }`}
             >
-              <UserPlus className="size-4" />
+              <User className="w-4 h-4 shrink-0" />
               <span className="hidden lg:inline">Friends</span>
             </button>
             <button
               onClick={() => setActiveTab("groups")}
-              className={`py-2 px-4 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs lg:text-sm font-semibold transition-all ${
                 activeTab === "groups"
-                  ? "bg-primary text-primary-content shadow-md scale-100"
-                  : "text-base-content/60 hover:text-base-content hover:bg-base-100/50 scale-95 hover:scale-100"
+                  ? "bg-base-100 text-primary shadow-sm"
+                  : "text-base-content/55 hover:text-base-content"
               }`}
             >
-              <Users className="size-4" />
+              <UsersRound className="w-4 h-4 shrink-0" />
               <span className="hidden lg:inline">Groups</span>
             </button>
           </div>
 
-          {/* Online filter toggle - only show for friends */}
           {activeTab === "friends" && (
-            <div className="hidden lg:flex items-center gap-2">
-              <button
-                onClick={() => setShowOnlineOnly(!showOnlineOnly)}
-                className={`py-1.5 px-3 rounded-full text-xs font-semibold transition-all duration-300 flex items-center justify-center gap-2 border ${
-                  showOnlineOnly
-                    ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.1)]"
-                    : "bg-base-200/50 text-base-content/50 hover:bg-base-200 border-transparent"
-                }`}
-              >
-                <span className="text-sm">online only</span>
-              </button>
-            </div>
+            <button
+              onClick={() => setShowOnlineOnly(!showOnlineOnly)}
+              title="Show online only"
+              className={`shrink-0 w-10 h-10 rounded-xl border flex items-center justify-center transition-all ${
+                showOnlineOnly
+                  ? "bg-emerald-500/15 text-emerald-500 border-emerald-500/30"
+                  : "bg-base-200/60 text-base-content/45 border-white/10 hover:text-base-content"
+              }`}
+            >
+              <Wifi className="w-4 h-4" />
+            </button>
           )}
         </div>
       </div>
 
-      {/* Content Area */}
-      <div className="overflow-y-auto w-full py-4 px-2 flex-1">
+      {/* List */}
+      <div className="flex-1 overflow-y-auto p-2 lg:p-3 space-y-1">
         {activeTab === "friends" ? (
           <>
-            {filteredUsers.map((user) => (
-              <button
-                key={user._id}
-                onClick={() => setSelectedUser(user)}
-                className={`
-                  w-full p-3 flex items-center gap-4 rounded-2xl transition-all duration-300 group hover:shadow-sm
-                  ${selectedUser?._id === user._id 
-                    ? "bg-gradient-to-r from-primary/20 to-primary/5 shadow-sm border border-primary/20" 
-                    : "border border-transparent hover:bg-base-200/50"}
-                `}
-              >
-                <div className="relative mx-auto lg:mx-0">
-                  <img
-                    src={user.profilePic || "/avatar.png"}
-                    alt={user.fullName}
-                    className="size-12 object-cover rounded-full ring-2 ring-transparent group-hover:ring-primary/30 transition-all duration-300"
-                  />
-                  {onlineUsers.includes(user._id) && (
-                    <span
-                      className="absolute bottom-0 right-0 size-3.5 bg-emerald-500 
-                      rounded-full ring-2 ring-base-100 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse"
-                    />
-                  )}
-                </div>
+            {filteredUsers.map((user) => {
+              const isOnline = onlineUsers.includes(user._id);
+              const selected = isSelected(user._id);
 
-                {/* User info - only visible on larger screens */}
-                <div className="hidden lg:block text-left min-w-0">
-                  <div className={`truncate ${user.email === "bey@email.com" ? "font-bold" : "font-semibold"}`}>
-                    {user.fullName}
-                    {user.email === "bey@email.com" && " (Admin)"}
+              return (
+                <button
+                  key={user._id}
+                  onClick={() => setSelectedUser(user)}
+                  className={`w-full p-2 lg:p-3 flex items-center gap-3 rounded-2xl transition-all duration-200 group ${
+                    selected
+                      ? "bg-primary/10 border border-primary/25 shadow-sm"
+                      : "border border-transparent hover:bg-base-200/60"
+                  }`}
+                >
+                  <div className="relative shrink-0 mx-auto lg:mx-0">
+                    <img
+                      src={user.profilePic || "/avatar.png"}
+                      alt={user.fullName}
+                      className={`size-11 lg:size-12 object-cover rounded-full transition-all ${
+                        selected ? "ring-2 ring-primary/50" : "ring-2 ring-transparent group-hover:ring-base-content/10"
+                      }`}
+                    />
+                    {isOnline && (
+                      <span className="absolute bottom-0.5 right-0.5 size-3 bg-emerald-500 rounded-full ring-2 ring-base-100" />
+                    )}
                   </div>
-                  <div className="text-xs">
-                    {onlineUsers.includes(user._id) ? "Online" : "Offline"}
+
+                  <div className="hidden lg:block text-left min-w-0 flex-1">
+                    <p className={`truncate text-sm ${user.email === "bey@email.com" ? "font-bold" : "font-semibold"}`}>
+                      {user.fullName}
+                      {user.email === "bey@email.com" && (
+                        <span className="ml-1.5 text-[10px] font-bold uppercase tracking-wide text-primary">Admin</span>
+                      )}
+                    </p>
+                    <p className={`text-xs mt-0.5 ${isOnline ? "text-emerald-500 font-medium" : "text-base-content/45"}`}>
+                      {isOnline ? "Online" : "Offline"}
+                    </p>
                   </div>
-                </div>
-              </button>
-            ))}
+                </button>
+              );
+            })}
 
             {filteredUsers.length === 0 && (
-              <div className="text-center text-zinc-500 py-4">
-                {showOnlineOnly ? "No online friends" : "No friends yet"}
+              <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+                <div className="w-12 h-12 rounded-2xl bg-base-200/80 flex items-center justify-center mb-3">
+                  <Users className="w-6 h-6 text-base-content/30" />
+                </div>
+                <p className="text-sm font-medium text-base-content/60">
+                  {showOnlineOnly ? "No friends online" : "No contacts found"}
+                </p>
               </div>
             )}
           </>
         ) : (
           <>
-            {groups
-              .filter((group) =>
-                group.name.toLowerCase().includes(searchTerm.toLowerCase())
-              )
-              .map((group) => (
+            {filteredGroups.map((group) => {
+              const selected = isSelected(group._id);
+
+              return (
                 <button
                   key={group._id}
                   onClick={() => openGroupChat(group)}
-                  className={`w-full text-left py-3 px-4 rounded-2xl flex items-center gap-4 transition-all duration-300 mb-2 group hover:shadow-sm
-                    ${selectedUser?.groupId === group._id 
-                      ? "bg-gradient-to-r from-primary/20 to-primary/5 shadow-sm border border-primary/20" 
-                      : "border border-transparent hover:bg-base-200/50"}`}
+                  className={`w-full p-2 lg:p-3 flex items-center gap-3 rounded-2xl transition-all duration-200 group ${
+                    selected
+                      ? "bg-primary/10 border border-primary/25 shadow-sm"
+                      : "border border-transparent hover:bg-base-200/60"
+                  }`}
                 >
-                  <div className="relative w-12 h-12">
+                  <div className="relative shrink-0 mx-auto lg:mx-0">
                     <img
-                      src={group.avatar || "/avatar.png"}
+                      src={group.profilePic || group.avatar || "/group-avatar.png"}
                       alt={group.name}
-                      className="w-12 h-12 rounded-full object-cover shadow-sm ring-2 ring-white/10 group-hover:ring-primary/30 transition-all duration-300"
+                      className={`size-11 lg:size-12 object-cover rounded-2xl transition-all ${
+                        selected ? "ring-2 ring-primary/50" : "ring-2 ring-transparent group-hover:ring-base-content/10"
+                      }`}
                     />
-                    <div className="absolute bottom-0 right-0 rounded-full p-1 bg-base-100 shadow-sm border border-white/10">
-                      <Users className="size-4" />
+                    <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-lg bg-base-100 border border-white/10 flex items-center justify-center shadow-sm">
+                      <UsersRound className="w-3 h-3 text-primary" />
                     </div>
                   </div>
-                  <div className="hidden lg:block text-left min-w-0">
-                    <div className="truncate font-semibold text-gray-800">{group.name}</div>
-                    <div className="text-xs text-gray-500">
+
+                  <div className="hidden lg:block text-left min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold">{group.name}</p>
+                    <p className="text-xs text-base-content/45 mt-0.5">
                       {group.members?.length || 0} members
-                    </div>
+                    </p>
                   </div>
                 </button>
-              ))}
-            
-            {groups.filter((group) =>
-              group.name.toLowerCase().includes(searchTerm.toLowerCase())
-            ).length === 0 && (
-              <div className="text-center text-zinc-500 py-4">
-                {searchTerm ? "No groups found" : "No groups yet"}
+              );
+            })}
+
+            {filteredGroups.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+                <div className="w-12 h-12 rounded-2xl bg-base-200/80 flex items-center justify-center mb-3">
+                  <UsersRound className="w-6 h-6 text-base-content/30" />
+                </div>
+                <p className="text-sm font-medium text-base-content/60">
+                  {searchTerm ? "No groups found" : "No groups yet"}
+                </p>
               </div>
             )}
           </>
@@ -261,4 +307,5 @@ const Sidebar = () => {
     </aside>
   );
 };
+
 export default Sidebar;

@@ -10,10 +10,10 @@ const NoChatSelected = () => {
   const [loopNum, setLoopNum] = useState(0);
   const [typingSpeed, setTypingSpeed] = useState(150);
 
-  // Updated words array to include user's name and Beyonder
+  // Updated words array to include user's name and chatwithme
   const words = authUser?.fullName
-    ? [`Welcome ${authUser.fullName}`, "Welcome to Beyonder"]
-    : ["Welcome", "Welcome to Beyonder"];
+    ? [`Welcome ${authUser.fullName}`, "Welcome to chatwithme"]
+    : ["Welcome", "Welcome to chatwithme"];
 
   useEffect(() => {
     const handleTyping = () => {
@@ -44,11 +44,12 @@ const NoChatSelected = () => {
     <div className="w-full flex flex-1 flex-col items-center justify-center p-16 bg-base-100/50">
       <div className="max-w-md text-center space-y-6">
         {/* Image Display */}
-        <div className="flex justify-center mb-8">
+        <div className="relative flex justify-center mb-8">
+          <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-primary/20 to-transparent blur-2xl" />
           <img
             src="/login_illustration.png"
             alt="Welcome Illustration"
-            className="rounded-2xl shadow-xl max-w-[200px] sm:max-w-[250px] object-cover border border-base-300/50 hover:scale-105 transition-transform duration-500"
+            className="relative rounded-3xl shadow-2xl w-full max-w-[320px] sm:max-w-[380px] object-contain drop-shadow-xl hover:scale-[1.03] transition-transform duration-500"
           />
         </div>
 

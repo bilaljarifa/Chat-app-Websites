@@ -14,6 +14,38 @@ const NotificationsPage = () => {
   const [requestedUsers, setRequestedUsers] = useState([]);
   const [sentRequests, setSentRequests] = useState([]);
 
+  // Dynamically force parent containers, html, and body to #FFFFFF background to prevent theme bleed-through at bottom of page
+  useEffect(() => {
+    const htmlEl = document.documentElement;
+    const bodyEl = document.body;
+    const rootEl = document.getElementById("root");
+    const appWrapper = document.querySelector("[data-theme]");
+
+    // Save original styles
+    const origHtmlBg = htmlEl.style.backgroundColor;
+    const origBodyBg = bodyEl.style.backgroundColor;
+    const origRootBg = rootEl ? rootEl.style.backgroundColor : "";
+    const origAppBg = appWrapper ? appWrapper.style.backgroundColor : "";
+
+    // Set to white
+    htmlEl.style.backgroundColor = "#FFFFFF";
+    bodyEl.style.backgroundColor = "#FFFFFF";
+    if (rootEl) rootEl.style.backgroundColor = "#FFFFFF";
+    if (appWrapper) {
+      appWrapper.style.backgroundColor = "#FFFFFF";
+    }
+
+    return () => {
+      // Restore original styles
+      htmlEl.style.backgroundColor = origHtmlBg;
+      bodyEl.style.backgroundColor = origBodyBg;
+      if (rootEl) rootEl.style.backgroundColor = origRootBg;
+      if (appWrapper) {
+        appWrapper.style.backgroundColor = origAppBg;
+      }
+    };
+  }, []);
+
   // Derived request lists from the store's friend requests
   const incomingRequests = friendRequests.filter((req) => req.direction === "incoming");
   const outgoingRequests = friendRequests.filter((req) => req.direction === "outgoing");
@@ -137,48 +169,48 @@ const NotificationsPage = () => {
   };
 
   return (
-    <div className={`min-h-screen pt-14 bg-base-100 ${theme === "dark" ? "dark" : ""}`}>
+    <div className="min-h-screen pt-20 bg-white text-slate-800" style={{ backgroundColor: "#FFFFFF" }}>
       <div className="max-w-[1600px] mx-auto p-6 py-8">
         {/* Header */}
         <div className="text-center mb-10">
           <div className="flex items-center justify-center gap-3 mb-2">
             <Bell className="w-8 h-8 text-primary" />
-            <h1 className="text-3xl font-bold text-base-content">Notifications</h1>
+            <h1 className="text-3xl font-bold text-slate-800">Notifications</h1>
           </div>
-          <p className="text-base-content/70">Manage your friend requests and discover new connections</p>
+          <p className="text-slate-600">Manage your friend requests and discover new connections</p>
         </div>
 
         {/* Cards Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           {/* Requests Received Card */}
-          <div className="card bg-base-200 shadow-xl h-[450px] flex flex-col">
+          <div className="card bg-slate-50/80 border border-slate-200/60 shadow-lg h-[450px] flex flex-col">
             <div className="card-body p-5 flex flex-col">
               <div className="flex items-center gap-3 mb-4 shrink-0">
-                <div className="p-2 bg-base-100 rounded-lg shadow-sm border border-base-300">
-                  <Users className="w-6 h-6 text-base-content/70" />
+                <div className="p-2 bg-white rounded-lg shadow-sm border border-slate-250">
+                  <Users className="w-6 h-6 text-slate-600" />
                 </div>
                 <div>
-                  <h2 className="card-title text-lg text-base-content">Requests Received</h2>
-                  <p className="text-sm text-base-content/60">Incoming friend requests</p>
+                  <h2 className="card-title text-lg text-slate-800 font-bold">Requests Received</h2>
+                  <p className="text-sm text-slate-500">Incoming friend requests</p>
                 </div>
               </div>
 
               {loadingRequests ? (
                 <div className="flex justify-center items-center flex-1">
-                  <Loader2 className="animate-spin w-8 h-8 text-base-content/70" />
+                  <Loader2 className="animate-spin w-8 h-8 text-primary" />
                 </div>
               ) : incomingRequests.length === 0 ? (
                 <div className="text-center flex flex-col justify-center items-center flex-1">
-                  <Users className="w-12 h-12 mx-auto mb-2 text-base-content/30" />
-                  <p className="text-sm text-base-content/60">No incoming requests</p>
+                  <Users className="w-12 h-12 mx-auto mb-2 text-slate-300" />
+                  <p className="text-sm text-slate-500">No incoming requests</p>
                 </div>
               ) : (
                 <div className="space-y-2 flex-1 overflow-y-auto pr-1 custom-scrollbar">
                   {incomingRequests.map((req) => (
                     <div
                       key={req._id}
-                      className="flex items-center gap-3 p-3 bg-base-100 rounded-lg border border-base-300 hover:shadow-md transition-all duration-200"
+                      className="flex items-center gap-3 p-3 bg-white rounded-lg border border-slate-200 hover:shadow-md transition-all duration-200"
                     >
                       <div className="avatar">
                         <div className="w-12 h-12 rounded-full">
@@ -190,8 +222,8 @@ const NotificationsPage = () => {
                         </div>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-base-content truncate text-sm">{req.fullName}</p>
-                        <p className="text-xs text-base-content/60 truncate">{req.email}</p>
+                        <p className="font-semibold text-slate-800 truncate text-sm">{req.fullName}</p>
+                        <p className="text-xs text-slate-500 truncate">{req.email}</p>
                       </div>
                       <div className="flex flex-col gap-1">
                         <button
@@ -218,7 +250,7 @@ const NotificationsPage = () => {
               
               {incomingRequests.length > 0 && (
                 <div className="mt-4 text-center shrink-0">
-                  <div className="text-base-content/70 font-semibold text-sm">
+                  <div className="text-slate-600 font-semibold text-sm">
                     {incomingRequests.length} pending request{incomingRequests.length !== 1 ? 's' : ''}
                   </div>
                 </div>
@@ -227,33 +259,33 @@ const NotificationsPage = () => {
           </div>
 
           {/* Requests Sent Card */}
-          <div className="card bg-base-200 shadow-xl h-[450px] flex flex-col">
+          <div className="card bg-slate-50/80 border border-slate-200/60 shadow-lg h-[450px] flex flex-col">
             <div className="card-body p-5 flex flex-col">
               <div className="flex items-center gap-3 mb-4 shrink-0">
-                <div className="p-2 bg-base-100 rounded-lg shadow-sm border border-base-300">
-                  <Send className="w-6 h-6 text-base-content/70" />
+                <div className="p-2 bg-white rounded-lg shadow-sm border border-slate-250">
+                  <Send className="w-6 h-6 text-slate-600" />
                 </div>
                 <div>
-                  <h2 className="card-title text-lg text-base-content">Requests Sent</h2>
-                  <p className="text-sm text-base-content/60">Outgoing friend requests</p>
+                  <h2 className="card-title text-lg text-slate-800 font-bold">Requests Sent</h2>
+                  <p className="text-sm text-slate-500">Outgoing friend requests</p>
                 </div>
               </div>
 
               {loadingRequests ? (
                 <div className="flex justify-center items-center flex-1">
-                  <Loader2 className="animate-spin w-8 h-8 text-base-content/70" />
+                  <Loader2 className="animate-spin w-8 h-8 text-primary" />
                 </div>
               ) : outgoingRequests.length === 0 ? (
                 <div className="text-center flex flex-col justify-center items-center flex-1">
-                  <Send className="w-12 h-12 mx-auto mb-2 text-base-content/30" />
-                  <p className="text-sm text-base-content/60">No outgoing requests</p>
+                  <Send className="w-12 h-12 mx-auto mb-2 text-slate-300" />
+                  <p className="text-sm text-slate-500">No outgoing requests</p>
                 </div>
               ) : (
                 <div className="space-y-2 flex-1 overflow-y-auto pr-1 custom-scrollbar">
                   {outgoingRequests.map((req) => (
                     <div
                       key={req._id}
-                      className="flex items-center gap-3 p-3 bg-base-100 rounded-lg border border-base-300 hover:shadow-md transition-all duration-200"
+                      className="flex items-center gap-3 p-3 bg-white rounded-lg border border-slate-200 hover:shadow-md transition-all duration-200"
                     >
                       <div className="avatar">
                         <div className="w-12 h-12 rounded-full">
@@ -265,13 +297,13 @@ const NotificationsPage = () => {
                         </div>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-base-content truncate text-sm">{req.fullName}</p>
-                        <p className="text-xs text-base-content/60 truncate">{req.email}</p>
-                        <div className="border border-base-content/30 text-base-content/70 text-xs px-2 py-1 rounded-md mt-1 w-fit">Pending</div>
+                        <p className="font-semibold text-slate-800 truncate text-sm">{req.fullName}</p>
+                        <p className="text-xs text-slate-500 truncate">{req.email}</p>
+                        <div className="border border-slate-200 text-slate-500 bg-slate-100 text-xs px-2 py-0.5 rounded-md mt-1 w-fit font-medium">Pending</div>
                       </div>
                       <button
                         onClick={() => handleCancelRequest(req._id)}
-                        className="btn btn-xs btn-outline btn-base-300 gap-1 min-w-[70px] hover:btn-error"
+                        className="btn btn-xs btn-outline border-slate-300 text-slate-600 hover:bg-error hover:text-white hover:border-error gap-1 min-w-[70px]"
                         title="Cancel Request"
                       >
                         <X className="w-3 h-3" />
@@ -284,7 +316,7 @@ const NotificationsPage = () => {
               
               {outgoingRequests.length > 0 && (
                 <div className="mt-4 text-center shrink-0">
-                  <div className="text-base-content/70 font-semibold text-sm">
+                  <div className="text-slate-600 font-semibold text-sm">
                     {outgoingRequests.length} pending request{outgoingRequests.length !== 1 ? 's' : ''}
                   </div>
                 </div>
@@ -293,15 +325,15 @@ const NotificationsPage = () => {
           </div>
 
           {/* Recommended Friends Card */}
-          <div className="card bg-base-200 shadow-xl h-[450px] flex flex-col">
+          <div className="card bg-slate-50/80 border border-slate-200/60 shadow-lg h-[450px] flex flex-col">
             <div className="card-body p-5 flex flex-col">
               <div className="flex items-center gap-3 mb-4 shrink-0">
-                <div className="p-2 bg-base-100 rounded-lg shadow-sm border border-primary/20">
+                <div className="p-2 bg-white rounded-lg shadow-sm border border-slate-250">
                   <Star className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h2 className="card-title text-lg text-base-content">Recommended Friends</h2>
-                  <p className="text-sm text-base-content/60">People you might know</p>
+                  <h2 className="card-title text-lg text-slate-800 font-bold">Recommended Friends</h2>
+                  <p className="text-sm text-slate-500">People you might know</p>
                 </div>
               </div>
 
@@ -311,15 +343,15 @@ const NotificationsPage = () => {
                 </div>
               ) : recommendedFriends.length === 0 ? (
                 <div className="text-center flex flex-col justify-center items-center flex-1">
-                  <Star className="w-12 h-12 mx-auto mb-2 text-base-content/30" />
-                  <p className="text-sm text-base-content/60">No recommendations</p>
+                  <Star className="w-12 h-12 mx-auto mb-2 text-slate-300" />
+                  <p className="text-sm text-slate-500">No recommendations</p>
                 </div>
               ) : (
                 <div className="space-y-2 flex-1 overflow-y-auto pr-1 custom-scrollbar">
                   {recommendedFriends.map((user) => (
                     <div
                       key={user._id}
-                      className="flex items-center gap-3 p-3 bg-base-100 rounded-lg border border-base-300 hover:shadow-md transition-all duration-200"
+                      className="flex items-center gap-3 p-3 bg-white rounded-lg border border-slate-200 hover:shadow-md transition-all duration-200"
                     >
                       <div className="avatar">
                         <div className="w-12 h-12 rounded-full">
@@ -331,9 +363,9 @@ const NotificationsPage = () => {
                         </div>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-base-content truncate text-sm">{user.fullName}</p>
+                        <p className="font-semibold text-slate-800 truncate text-sm">{user.fullName}</p>
                         <div className="flex items-center gap-2 mt-1">
-                          <div className="border border-primary text-primary text-xs px-2 py-1 rounded-md w-fit">
+                          <div className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-md w-fit font-semibold border border-primary/20">
                             {user.similarityPercentage || 0}% match
                           </div>
                         </div>
@@ -346,8 +378,8 @@ const NotificationsPage = () => {
                         }
                         className={`btn btn-xs gap-1 min-w-[70px] ${
                           requestedUsers.includes(user._id)
-                            ? "btn-outline btn-warning"
-                            : "btn-primary"
+                            ? "btn-outline border-warning text-warning hover:bg-warning hover:text-white"
+                            : "btn-primary text-white"
                         }`}
                         title={requestedUsers.includes(user._id) ? "Cancel Request" : "Send Request"}
                       >
