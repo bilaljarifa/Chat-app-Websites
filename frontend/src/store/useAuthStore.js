@@ -83,16 +83,26 @@ export const useAuthStore = create((set, get) => ({
   checkAuth: async () => {
     try {
       const res = await axiosInstance.get("/auth/check");
+
+      // ✅ Guard: ensure the response is a real user object, not an HTML page
+      // (can happen when VITE_BACKEND_URL is missing and Netlify serves index.html)
+      if (!res.data || typeof res.data !== "object" || !res.data._id) {
+        console.warn("⚠️ checkAuth received invalid response — backend URL may not be configured.");
+        set({ authUser: null });
+        return;
+      }
+
       set({ authUser: res.data });
-      
+
       // ✅ AUTOMATIC: Ensure user has encryption keys
       try {
         await axiosInstance.post("/user/ensure-keys");
         console.log("✅ Encryption keys verified/generated");
       } catch (keyError) {
-        console.error("Failed to ensure encryption keys:", keyError);
+        // Non-blocking: log silently, do not break auth flow
+        console.warn("ℹ️ ensure-keys skipped:", keyError?.response?.status, keyError?.message);
       }
-      
+
       get().connectSocket();
     } catch (error) {
       console.log("Error in checkAuth:", error);
