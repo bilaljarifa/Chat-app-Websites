@@ -27,8 +27,8 @@ const LoginPage = () => {
         <div className="w-full max-w-md">
           <div className="backdrop-blur-2xl bg-base-100/50 border border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] p-8 sm:p-10 space-y-8">
             <div className="space-y-3 text-center">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/70 shadow-lg shadow-primary/25">
-                <MessageSquare className="w-7 h-7 text-primary-content" />
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-pink-500 shadow-lg shadow-blue-500/25">
+                <MessageSquare className="w-7 h-7 text-white" />
               </div>
               <div>
                 <p className="text-sm font-medium text-primary tracking-wide uppercase">chatwithme</p>
@@ -119,9 +119,6 @@ const LoginPage = () => {
             <Sparkles className="w-4 h-4" />
             Real-time chat
           </div>
-          <h2 className="text-3xl xl:text-4xl font-bold leading-tight">
-            Connect instantly with the people who matter
-          </h2>
         </div>
       </div>
     </div>

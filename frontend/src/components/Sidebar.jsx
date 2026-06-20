@@ -106,8 +106,8 @@ const Sidebar = () => {
       <div className="hidden lg:flex shrink-0 p-5 border-b border-white/10 bg-gradient-to-b from-base-100/90 to-transparent flex-col space-y-4">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-md shadow-primary/25 transition-transform duration-300 hover:scale-105">
-              <MessageSquare className="w-5 h-5 text-primary-content" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 via-indigo-500 to-pink-500 flex items-center justify-center shadow-md shadow-blue-500/25 transition-transform duration-300 hover:scale-105">
+              <MessageSquare className="w-5 h-5 text-white" />
             </div>
             {onlineCount > 0 && activeTab === "friends" && (
               <span className="absolute -top-0.5 -right-0.5 flex h-3.5 w-3.5">

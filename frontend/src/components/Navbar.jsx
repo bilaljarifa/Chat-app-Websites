@@ -76,8 +76,8 @@ const Navbar = () => {
                 <img src="/BeyonderAdmin.png" alt="Logo" className="h-12 w-auto" />
               ) : (
                 <>
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
-                    <MessageSquare className="w-5 h-5 text-primary-content" />
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 via-indigo-500 to-pink-500 flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:scale-105 transition-transform">
+                    <MessageSquare className="w-5 h-5 text-white" />
                   </div>
                   <div className="hidden sm:block">
                     <h1 className="text-lg font-bold leading-none">chatwithme</h1>

@@ -50,10 +50,9 @@ const SignUpPage = () => {
           <div className="text-center mb-8">
             <div className="flex flex-col items-center gap-2 group">
               <div
-                className="size-12 rounded-xl bg-primary/10 flex items-center justify-center 
-              group-hover:bg-primary/20 transition-colors"
+                className="size-12 rounded-xl bg-gradient-to-br from-blue-500 via-indigo-500 to-pink-500 flex items-center justify-center shadow-md shadow-blue-500/20 hover:scale-105 transition-transform"
               >
-                <MessageSquare className="size-6 text-primary" />
+                <MessageSquare className="size-6 text-white" />
               </div>
               <h1 className="text-2xl font-bold mt-2">Create Account</h1>
               <p className="text-base-content/60">Get started with your free account</p>
